@@ -45,10 +45,19 @@ def genetski(ime, opt, npop=20, niter=23, nsk=7,
   print(jed.skor, Jedinka.rastojanje(jed, opt))
   #jed.nacrtaj()
 
+# Jato ptica
+def jato(ime, opt, npop=10, niter=30, nsk=7,
+         lok=2, glob=2, kazna=True, seme=7):
+  jed = Jedinka.jato(ime, npop, niter, nsk, lok, glob, kazna, seme)
+
+  # Prikazivanje rezultata
+  print(jed.skor, Jedinka.rastojanje(jed, opt))
+  #jed.nacrtaj()
+
 # Glavna funkcija
 def main():
   # Svi implementirani algoritmi
-  algoritmi = iscrpna, slucajna, lokalna, simkal, genetski
+  algoritmi = iscrpna, slucajna, lokalna, simkal, genetski, jato
 
   # Svi generisani test primeri
   datoteke = ('../Primeri/ulaz9.txt',
@@ -61,8 +70,8 @@ def main():
   # svaki generisani test primer
   for algoritam in algoritmi:
     print(algoritam.__name__)
-    for datoteka, optt in zip(datoteke, opt):
-      algoritam(datoteka, optt)
+    for datoteka in zip(datoteke, opt):
+      algoritam(*datoteka)
     print()
 
 # Ispitivanje nacina pokretanja

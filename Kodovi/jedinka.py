@@ -52,11 +52,45 @@ def swap(niz, i, j, elem=None):
   return niz if isinstance(niz[0], int)\
              else ''.join(niz)
 
+# Klasa za izmene
+class Izmene():
+  # Konstruktor klase
+  def __init__(self, kod):
+    self.kod = kod
+
+  # Konkatenacija izmena
+  def __add__(self, dr):
+    return Izmene(self.kod + dr.kod)
+
+  # Prosirivanje izmena
+  def __iadd__(self, dr):
+    self.kod += dr.kod
+    return self
+
+  # Umnozavanje izmena
+  def __rmul__(self, koef):
+    koef, ceo = np.modf(koef)
+    koef = int(np.ceil(koef*len(self.kod)))
+    return Izmene(int(ceo) * self.kod + self.kod[:koef])
+
+  # Stringovni prikaz
+  def __str__(self):
+    return f'Izmene{self.kod}'
+
 # Klasa za jedinke
 class Jedinka(Polygon):
   # Brojac popunjenih jedinki tj.
   # evaluacije fje prilagodjenosti
   BROJAC = 0
+
+  # Dekorator za odlozenu inicijalizaciju
+  def odlozena(metod):
+    def omotac(*args):
+      for self in args:
+        if isinstance(self, Jedinka):
+          self.popuni()
+      return metod(*args)
+    return omotac
   
   # Potvrda crvene boje
   @staticmethod
@@ -141,8 +175,9 @@ class Jedinka(Polygon):
 
       # Ako je brisanje
       else: #op == 'delete'
-        # Indeks slova koje se brise
-        operacije.append(('obrisi', i))
+        # Slovo koje se brise; nije indeks
+        # kako bi radilo kod jata ptica
+        operacije.append(('obrisi', ord(prva[i])))
 
         # Brisanje suvisnog slova
         prva = prva[:i] + prva[i+1:]
@@ -156,6 +191,11 @@ class Jedinka(Polygon):
   # Iscrpna rekonstrukcija
   @staticmethod
   def sveops(prva, druga):
+    # Izvlacenje koda
+    if isinstance(druga, Jedinka):
+      druga = druga.kod
+
+    # Minimizacija duzine puta
     return min((Jedinka.rastops(prva, dr) for dr
                 in sverot(druga)), key=len)
 
@@ -180,11 +220,14 @@ class Jedinka(Polygon):
 
       # Dodavanje broja na indeks
       elif op == 'dodaj':
-        jedinka.insert(*ind)
+        i, slovo = ind
+        if slovo not in jedinka:
+          jedinka.insert(i, slovo)
 
-      # Brisanje sa indeksa
-      else: #op == 'obrisi'
-        jedinka.pop(ind)
+      # Brisanje sa indeksa;
+      # elif op == 'obrisi'
+      elif ind in jedinka and len(jedinka) > 3:
+        jedinka.remove(ind)
 
       # Popunjavanje liste
       if postupno:
@@ -361,8 +404,8 @@ class Jedinka(Polygon):
 
   # Dohvatanje skora
   @staticmethod
+  @odlozena
   def skor(jedinka):
-    jedinka.popuni()
     return jedinka.skor
 
   # Ruletska selekcija
@@ -593,6 +636,40 @@ class Jedinka(Polygon):
     # Vracanje najbolje jedinke
     return populacija[0]
 
+  # Optimizacija jatom ptica
+  @staticmethod
+  def jato(ime, npop=10, niter=50, nsk=10,
+           lok=2, glob=2, kazna=True, seme=None):
+    # Inicijalizacija pseudoslucajnosti
+    seed(seme)
+
+    # Inicijalizacija populacije
+    ptice = Jedinka.initpop(ime, npop, kazna)
+    loknaj = ptice.copy()
+    globnaj = min(ptice)
+    brzine = [Izmene([]) for i in range(npop)]
+
+    # Iterativno 'letenje' jedinki
+    for i in range(1, niter):
+      # Za svaku pticu iz jata
+      for j in range(npop):
+        # Azuriranje brzine
+        brzine[j] += lok * random() * (loknaj[j] - ptice[j]) \
+                   + glob * random() * (globnaj - ptice[j])
+
+        # Azuriranje pozicije
+        ptice[j] = ptice[j] + brzine[j]
+
+        # Azuriranje minimuma
+        loknaj[j] = min(loknaj[j], ptice[j])
+        globnaj = min(globnaj, ptice[j])
+
+      # Kaljenje najbolje jedinke
+      globnaj.simkali(nsk, seme)
+
+    # Vracanje najbolje jedinke
+    return globnaj
+
   # Standardizacija koda jedinke; preciscenom domenu
   # pripadaju samo one ciji je prvi element minimalan,
   # a drugi manji od poslednjeg, npr. samo x = (1,2,3)
@@ -668,17 +745,6 @@ class Jedinka(Polygon):
 
       # Azuriranje brojaca jedinki
       Jedinka.BROJAC += 1
-      if Jedinka.BROJAC % 50000 == 0:
-        print(Jedinka.BROJAC)
-
-  # Dekorator za odlozenu inicijalizaciju
-  def odlozena(metod):
-    def omotac(*args):
-      for self in args:
-        if isinstance(self, Jedinka):
-          self.popuni()
-      return metod(*args)
-    return omotac
   
   # Konstruktor jedinke
   def __init__(self, kod, tacke, boje, crvenih=None, plavih=None, kazna=True):
@@ -794,15 +860,27 @@ class Jedinka(Polygon):
     x = [t[0] for t in self.tacke]
     y = [t[1] for t in self.tacke]
 
+    # Prikaz samo problema
+    if i == 2:
+      fig.add_subplot(321).scatter(x, y, c=self.boje)
+
     # Prikaz problema i resenja
     if fig is None:
       plt.scatter(x, y, c=self.boje)
       plt.plot(*self.exterior.xy)
       plt.show()
     else:
-      fig = fig.add_subplot(220+i)
+      fig = fig.add_subplot(320+i)
       fig.scatter(x, y, c=self.boje)
       fig.plot(*self.exterior.xy)
+
+  # Dodavanje izmena
+  def __add__(self, izmene):
+    return self.kopija(Jedinka.primeni(self, izmene.kod))
+
+  # Razlika jedinki
+  def __sub__(self, dr):
+    return Izmene(Jedinka.sveops(dr, self))
 
   # Poredjenje jedinki
   @odlozena

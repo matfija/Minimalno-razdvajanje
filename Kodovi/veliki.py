@@ -24,9 +24,8 @@ def generisi(broj, naj, seme=0):
 
 # Uporedjivanje rezultata
 def uporedi(broj, seme=0):
+  # Ime velike datoteke
   ime = f'../Primeri/ulaz{broj}.txt'
-  opt1 = [0, 4, 11, 15, 12, 20, 10, 21, 1, 9]
-  op2 = [0, 13, 20, 8, 12, 26, 14, 15, 9, 1, 21, 27]
 
   # Upisivanje rezultata u datoteku
   with open(f'../Skorovi/skor{broj}.txt', 'w') as dat:
@@ -46,10 +45,14 @@ def uporedi(broj, seme=0):
     print('Kaljenje:', jed.skor, jed.kod, file=dat)
 
     # Primena genetskog algoritma
-    jed = Jedinka.genetski(ime, npop=500, niter=250,
-                           nsk=10, pc=0.9, pm=0.3,
-                           kazna=False, seme=0)
+    jed = Jedinka.genetski(ime, npop=500, niter=250, nsk=10,
+                           pc=0.9, pm=0.3, kazna=False, seme=0)
     print('Genetski:', jed.skor, jed.kod, file=dat)
+
+    # Primena jata ptica
+    jed = Jedinka.jato(ime, npop=500, niter=250, nsk=10,
+                       lok=2, glob=2, kazna=False, seme=0)
+    print('Jato:', jed.skor, jed.kod, file=dat)
 
 # Prikazivanje rezultata
 def prikazi(broj):
@@ -61,8 +64,8 @@ def prikazi(broj):
     resenja = [eval(''.join(rez.split(' ')[2:])) for rez in dat]
   
   # Prikazivanje svakog
-  fig = plt.figure(figsize=(8,6))
-  for i, res in enumerate(resenja, 1):
+  fig = plt.figure(figsize=(7,7))
+  for i, res in enumerate(resenja, 2):
     Jedinka(res, *primer, False).nacrtaj(fig, i)
   fig.tight_layout()
   fig.show()
