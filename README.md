@@ -1,5 +1,5 @@
 #### Metaheuristike
-<img width="700" src="https://github.com/matfija/Minimalno-razdvajanje/blob/master/Slike/poredjenje30.png">
+<img width="800" src="https://github.com/matfija/Minimalno-razdvajanje/blob/master/Slike/poredjenje30v.png">
 
 ## Minimalno razdvajanje :triangular_ruler:
 Seminarski rad na kursu Računarska inteligencija. Cilj je bio osmisliti optimizacioni algoritam za određivanje [minimalnog mnogougaonog razdvajanja dva konačna skupa crvenih i plavih tačaka u ravni](https://www.csc.kth.se/~viggo/wwwcompendium/node272.html). Tražen je najmanji (u smislu obima) mnogougao koji ispunjava postavljeni zahtev – temena su mu iz zadatih skupova obojenih tačaka i njihova boja se zanemaruje, pri čemu on deli ravan na dva dela, unutrašnjost i spoljašnjost, tako da su sve tačke koje se nalaze u jednom delu iste boje, dok je boja tačaka u različitim delovima različita. Izložen je kontrolni algoritam iscrpne pretrage koji garantovano pronalazi optimum, zatim neka heuristička rešenja iz literature, slučajna i lokalna pretraga sa simuliranim kaljenjem, a na kraju je predložena evolutivna metaheuristika zasnovana na genetskom algoritmu, kao i optimizacija jatom ptica iz grupe inteligencije rojeva.
