@@ -55,8 +55,8 @@ def swap(niz, i, j, elem=None):
 # Klasa za izmene
 class Izmene():
   # Konstruktor klase
-  def __init__(self, kod):
-    self.kod = kod
+  def __init__(self, kod=[]):
+    self.kod = kod.copy()
 
   # Konkatenacija izmena
   def __add__(self, dr):
@@ -646,8 +646,8 @@ class Jedinka(Polygon):
     # Inicijalizacija populacije
     ptice = Jedinka.initpop(ime, npop, kazna)
     loknaj = ptice.copy()
-    globnaj = min(ptice)
-    brzine = [Izmene([]) for i in range(npop)]
+    globnaj = ptice[0]
+    brzine = [Izmene() for i in range(npop)]
 
     # Iterativno 'letenje' jedinki
     for i in range(1, niter):
